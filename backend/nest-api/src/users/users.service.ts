@@ -9,6 +9,9 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find();
+  }
 
   async create(user: Partial<User>): Promise<User> {
     const newUser = this.usersRepository.create(user);
@@ -19,7 +22,7 @@ export class UsersService {
     return this.usersRepository.findOneBy({ email });
   }
 
-  async userDetails(id: number): Promise<User | null> {
+  async findOneById(id: number): Promise<User | null> {
     return this.usersRepository.findOneBy({ id });
   }
 }

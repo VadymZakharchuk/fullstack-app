@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
+import { LoginPage } from './pages/LoginPage';
 import './App.css'; // Залишаємо CSS файл
 
 function App() {
