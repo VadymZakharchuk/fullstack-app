@@ -19,7 +19,10 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOneBy({ email });
+    return await this.usersRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'name', 'password'],
+    });
   }
 
   async findOneById(id: number): Promise<User | null> {

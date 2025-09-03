@@ -1,19 +1,11 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import { LoginPage } from './pages/LoginPage';
-import './App.css'; // Залишаємо CSS файл
+import { Link } from 'react-router-dom';
+import './App.css';
 
 function App() {
   return (
-    <BrowserRouter>
-      <nav>
-        <Link to="/">Домашня</Link> | <Link to="/login">Вхід</Link>
-      </nav>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-      </Routes>
-    </BrowserRouter>
+    <nav>
+      <Link to="/">Home Page</Link> | <Link to="/login">Login</Link>
+    </nav>
   );
 }
 

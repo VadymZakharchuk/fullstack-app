@@ -9,6 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { UserDto } from '../users/dto/user.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,5 +26,9 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials for login');
     }
     return this.authService.login(user);
+  }
+  @Post('register')
+  async register(@Body() body: RegisterDto) {
+    return this.authService.register(body);
   }
 }
