@@ -3,9 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/user.entity';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { CategoriesModule } from './categories/categories.module';
+import { CounterPartiesModule } from './counter-parties/counter-parties.module';
+import { dataSourceOptions } from '../ormconfig';
 
 @Module({
   imports: [
@@ -14,21 +17,17 @@ import { AuthModule } from './auth/auth.module';
       envFilePath: '.env',
     }),
 
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true,
-      entities: [User],
-      synchronize: true, // ВАЖЛИВО: Використовувати тільки для розробки!
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
 
     UsersModule,
 
     AuthModule,
+
+    TransactionsModule,
+
+    CategoriesModule,
+
+    CounterPartiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

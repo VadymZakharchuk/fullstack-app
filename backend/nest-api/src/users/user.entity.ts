@@ -1,5 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  BeforeInsert,
+  OneToMany,
+} from 'typeorm';
+import { Transaction as UserTransaction } from '../transactions/transaction.entity';
 import bcrypt from 'bcryptjs';
+import { CounterParty } from '../counter-parties/counter-party.entity';
+import { Category } from '../categories/category.entity';
 
 @Entity()
 export class User {
@@ -12,10 +21,18 @@ export class User {
   @Column()
   name: string;
 
-  @Column({ select: false }) // select: false - запобігає виведенню пароля в запитах
+  @Column({ select: false })
   password: string;
 
-  // Хук, який спрацює перед вставкою (insert) сутності в БД
+  @OneToMany(() => UserTransaction, (transaction) => transaction.user)
+  transactions: UserTransaction[];
+
+  @OneToMany(() => CounterParty, (counterParty) => counterParty.user)
+  counterParties: CounterParty[];
+
+  @OneToMany(() => Category, (category) => category.user)
+  categories: Category[];
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
