@@ -1,6 +1,6 @@
 import axios from 'axios';
-import type { LoginFormData } from '../pages/LoginPage';
-import {setAuth} from "../store/auth/authSlice.ts";
+import type { LoginFormData } from '../pages/login-page/LoginPage.tsx';
+import { setAuth } from "../store/auth/authSlice.ts";
 import type { AppDispatch } from "../store";
 
 const API_URL = 'http://localhost:3000/auth';
@@ -14,6 +14,7 @@ export const login = async (data: LoginFormData, dispatch: AppDispatch) => {
     const { access_token, user } = response.data;
     if (access_token) {
       localStorage.setItem('access_token', access_token);
+      localStorage.setItem('user', JSON.stringify(user));
       dispatch(setAuth({ user: user, token: access_token }));
     }
 

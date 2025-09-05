@@ -3,11 +3,23 @@
 
 @theme {
     --font-roboto: "Roboto", sans-serif;
+    --color-header-text: #212121;
+    --color-body-text: #757575;
+    --color-back-green: #4caf50;
+    --color-soft-blue: #4caf50;
+    --color-back-orange: #ff5722;
+    --color-transaction: #4caf50;
+    --color-analytic: #009688;
+    --color-smart: #ff5722;
+    --color-search: #cddc39;
+    --color-anomaly: #344955;
+    --color-personalised: #4caf9a;
+    --color-balancio: #898fd1;
 }
 @layer base {
     :root {
         color: rgba(255, 255, 255, 0.87);
-        background-color: #242424;
+        background-color: #f1f6f9;
         width: 100%;
     }
 

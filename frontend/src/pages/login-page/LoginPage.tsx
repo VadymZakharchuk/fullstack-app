@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom';
-import { login, registerUser } from "../services/authService.ts";
+import {useLocation, useNavigate} from 'react-router-dom';
+import { login, registerUser } from "../../services/authService.ts";
 import {
   errorClass,
   h2Class,
@@ -9,8 +9,8 @@ import {
   linkClass,
   submitClass
 } from "./LoginPageStyles.ts";
-import { useState } from "react";
-import SuccessToast2 from "../components/Toast.tsx";
+import {useEffect, useState} from "react";
+import SuccessToast2 from "../../components/Toast.tsx";
 import {useDispatch} from "react-redux";
 
 export interface LoginFormData {
@@ -31,18 +31,29 @@ const LoginPage = () => {
   const [mode, setMode] = useState<ModeType>('login');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (location.pathname.includes('login')) {
+      setMode('login');
+    }
+    else {
+      setMode('register');
+    }
+  }, [location.pathname, navigate]);
+
   const onSubmit = async (data: LoginFormData) => {
     setShowSuccessToast(false);
     if (mode === 'login') {
       try {
-        const response = await login(data, dispatch);
-        console.log("Access granted! Token:", response.access_token);
-        navigate('/');
-      } catch (error: any) {
-        console.error("Auth error:", error.message);
-        alert(error.message);
+        await login(data, dispatch);
+        navigate('/main');
+      } catch (error) {
+        const authError = error as Error;
+        console.error("Auth error:", authError.message);
+        alert(authError.message);
       }
     } else {
       try {
@@ -52,9 +63,9 @@ const LoginPage = () => {
           setShowSuccessToast(true);
         }
         navigate('/login');
-      } catch (error: any) {
-        console.error("Auth error:", error.message);
-        alert(error.message);
+      } catch (error) {
+        const authError = error as Error;
+        console.error("Auth error:", authError.message);
       }
     }
   };
