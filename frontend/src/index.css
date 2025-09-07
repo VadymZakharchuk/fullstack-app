@@ -15,6 +15,7 @@
     --color-anomaly: #344955;
     --color-personalised: #4caf9a;
     --color-balancio: #898fd1;
+    --color-primary: #4f46e5;
 }
 @layer base {
     :root {

@@ -59,7 +59,6 @@ const LoginPage = () => {
       try {
         const response = await registerUser(data);
         if (response.includes('Account with email')) {
-          console.log("Registered:", response);
           setShowSuccessToast(true);
         }
         navigate('/login');
@@ -82,10 +81,10 @@ const LoginPage = () => {
               id="email"
               className={inputClass}
               {...register('email', {
-                required: "E-mail is required field",
+                required: "Поле E-mail є обов'язковим",
                 pattern: {
                   value: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                  message: 'Enter a valid email address',
+                  message: 'ВВедіть коректну EMail адресу',
                 }
               })}
             />
@@ -98,7 +97,7 @@ const LoginPage = () => {
               id="password"
               className={inputClass}
               {...register("password", {
-                required: "Password is required field",
+                required: "Поле пароль є обов'язковим",
                 minLength: {
                   value: 6,
                   message: "Пароль має бути не менше 6 символів.",
@@ -116,7 +115,7 @@ const LoginPage = () => {
                 id="passwordConfirm"
                 className={inputClass}
                 {...register("password", {
-                  required: "Password is required field",
+                  required: "Поле пароль є обов'язковим",
                   minLength: {
                     value: 6,
                     message: "Пароль має бути не менше 6 символів.",

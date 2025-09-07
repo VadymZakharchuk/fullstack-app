@@ -63,7 +63,7 @@ const Header =() => {
   }
 
   return (
-    <nav className={`bg-gray-50 w-full p-1 md:text-sm md:border-b md:border-body-text ${state ? "shadow-lg rounded-xl mx-2 mt-2  md:mx-2 md:mt-0" : ""}`}>
+    <nav className={`bg-gray-50 w-full p-1 md:text-sm md:border-b md:border-body-text  md:px-[64px] ${state ? "shadow-lg rounded-xl mx-2 mt-2  md:mx-2 md:mt-0" : ""}`}>
       <div className="gap-x-14 justify-between items-center max-w-screen-xl mx-auto md:flex lg:max-h-fit">
         <div className="flex items-center justify-between py-5 md:block">
           <a href="javascript:void(0)">
