@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {useDispatch, useSelector} from "react-redux";
 import type { RootState } from "../../store";
 import { LogIn, LogOut, UserPlus } from "lucide-react";
@@ -8,9 +8,9 @@ import { Link } from "react-router-dom";
 const Header =() => {
 
   const [state, setState] = useState(false)
+  const { isAuth } = useSelector((state: RootState) => state.auth);
 
-  // Replace javascript:void(0) paths with your paths
-  const navigation = [
+  const initialNavigation = [
     { title: "Можливості", path: "/features" },
     { title: "Ціни", path: "/pricing" },
     { title: "Блог", path: "/blog" },
@@ -25,7 +25,15 @@ const Header =() => {
       if (!target.closest(".menu-btn")) setState(false);
     };
   }, [])
-  const { isAuth } = useSelector((state: RootState) => state.auth);
+
+  const navigation = useMemo(() => {
+    const newNavigation = [...initialNavigation];
+    if (isAuth) {
+      newNavigation[0] = { title: "Головна", path: "/main" };
+    }
+    return newNavigation;
+  }, [isAuth]);
+
 
   const isNotLogged = () => {
     return (
@@ -57,8 +65,6 @@ const Header =() => {
     )
   }
   const logOut = async () => {
-    localStorage.setItem('access_token', '');
-    localStorage.setItem('user', '');
     dispatch(logout());
   }
 
@@ -66,14 +72,14 @@ const Header =() => {
     <nav className={`bg-gray-50 w-full p-1 md:text-sm md:border-b md:border-body-text  md:px-[64px] ${state ? "shadow-lg rounded-xl mx-2 mt-2  md:mx-2 md:mt-0" : ""}`}>
       <div className="gap-x-14 justify-between items-center max-w-screen-xl mx-auto md:flex lg:max-h-fit">
         <div className="flex items-center justify-between py-5 md:block">
-          <a href="javascript:void(0)">
+          <Link to='/'>
             <img
               src='/img/B_Logo.png'
               width={280}
               height={45}
               alt="Balancio logo"
             />
-          </a>
+          </Link>
           <div className="md:hidden">
             <button className="menu-btn text-gray-500 hover:text-gray-800"
                     onClick={() => setState(!state)}

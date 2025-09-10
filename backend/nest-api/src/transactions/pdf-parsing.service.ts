@@ -18,28 +18,30 @@ export class PdfParsingService {
   }
 
   private extractTransactionsFromText(text: string) {
-    const transactions: {
-      date: Date;
-      description: string;
-      mcc: string;
-      amount: number;
-      type: 'expense' | 'income';
-    }[] = [];
-    const lines = text.split('\n');
+    const transactions = [];
 
-    // Регулярний вираз для вилучення даних
-    const transactionRegex =
-      /(\d{2}\.\d{2}\.\d{4})\s*(\d{2}:\d{2}:\d{2})\s*(.+?)\s*(\d{4})\s*(-?\d+[\s,]\d{2})\s*(-?\d+[\s,]\d{2})\s*([A-Z]{3})/;
+    // Регулярний вираз для захоплення блоку транзакції.
+    // Він починається з дати, часу і захоплює весь текст до наступної дати або до кінця рядка.
+    const transactionBlockRegex =
+      /(\d{2}\.\d{2}\.\d{4})\s*(\d{2}:\d{2}:\d{2})\s*([\s\S]+?)(?=\d{2}\.\d{2}\.\d{4}|Z)/g;
 
-    for (const line of lines) {
-      const match = line.match(transactionRegex);
+    let match;
+    while ((match = transactionBlockRegex.exec(text)) !== null) {
+      const dateString = match[1];
+      const timeString = match[2];
+      const blockContent = match[3];
 
-      if (match) {
-        const dateString = match[1];
-        const timeString = match[2];
-        const description = match[3].trim();
-        const mcc = match[4];
-        const amountString = match[5].replace(',', '.').replace(/\s/g, '');
+      // Другий регулярний вираз для детального парсингу вмісту блоку.
+      // Він шукає опис, MCC та суми, ігноруючи переноси рядків.
+      const blockDetailsRegex =
+        /^(.*?)\s*(\d{4})?\s*(-?\d{1,3}(?:\s\d{3})*[\s,]\d{2})\s*(-?\d{1,3}(?:\s\d{3})*[\s,]\d{2})\s*([A-Z]{3})/m;
+
+      const blockMatch = blockContent.match(blockDetailsRegex);
+      console.log(match);
+      if (blockMatch) {
+        const description = blockMatch[1].trim();
+        const mcc = blockMatch[2] || '';
+        const amountString = blockMatch[3].replace(',', '.').replace(/\s/g, '');
 
         const transaction = {
           date: new Date(
@@ -56,7 +58,7 @@ export class PdfParsingService {
         transactions.push(transaction);
       }
     }
-
-    return transactions;
+    console.log(transactions);
+    return []; // transactions;
   }
 }

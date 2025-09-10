@@ -11,7 +11,7 @@ import {
 } from "./LoginPageStyles.ts";
 import {useEffect, useState} from "react";
 import SuccessToast2 from "../../components/Toast.tsx";
-import {useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
 
 export interface LoginFormData {
   email: string;
@@ -27,7 +27,12 @@ const LoginPage = () => {
     handleSubmit,
     formState: { errors },
     getValues,
-  } = useForm<LoginFormData>();
+  } = useForm<LoginFormData>({
+    defaultValues: {
+      email: import.meta.env.VITE_DEV_EMAIL,
+      password: import.meta.env.VITE_DEV_PASSWORD,
+    }
+  });
   const [mode, setMode] = useState<ModeType>('login');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 

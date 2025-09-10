@@ -42,24 +42,22 @@ const SectionThree = () => {
         </div>
         <div className='flex flex-row w-wull border-b border-body-text pb-[60px]'>
           <div className='flex flex-col w-[50%] pr-4'>
-            { cardsData.map((card) => {
+            { cardsData.map((card, index) => {
               const renderIcon = () => {
                 const IconComponent = card.icon as React.ComponentType<LucideProps>;
                 return <IconComponent className="w-8 h-8" />;
               };
               const iconClass = `${card.color} w-16 h-16 bg-gradient-to-br rounded-2xl flex items-center justify-center shadow-lg mt-6 mr-4"`;
                 return (
-                  <>
-                    <div className='flex flex-row justify-between w-full'>
-                      <div className={iconClass}>
-                        { renderIcon() }
-                      </div>
-                      <div className='flex flex-col md:w-[460px]'>
-                        <div className="mt-6 text-xl font-bold text-header-text mb-4">{card.title}</div>
-                        <div className="text-body-text mb-6 leading-relaxed">{card.description}</div>
-                      </div>
+                  <div key={index}  className='flex flex-row justify-between w-full'>
+                    <div className={iconClass}>
+                      { renderIcon() }
                     </div>
-                  </>
+                    <div className='flex flex-col md:w-[460px]'>
+                      <div className="mt-6 text-xl font-bold text-header-text mb-4">{card.title}</div>
+                      <div className="text-body-text mb-6 leading-relaxed">{card.description}</div>
+                    </div>
+                  </div>
                 )
               }
             )}
@@ -69,7 +67,7 @@ const SectionThree = () => {
                  alt="promo-image"
                  width={620}
                  height={530}
-                 className="rounded-lg mt-6"
+                 className="rounded-lg mt-6 shadow-lg"
             />
           </div>
         </div>

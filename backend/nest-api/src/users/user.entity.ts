@@ -24,6 +24,9 @@ export class User {
   @Column({ select: false })
   password: string;
 
+  @Column({ nullable: true })
+  hashedRefreshToken?: string;
+
   @OneToMany(() => UserTransaction, (transaction) => transaction.user)
   transactions: UserTransaction[];
 

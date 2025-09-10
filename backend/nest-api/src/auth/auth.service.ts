@@ -15,7 +15,6 @@ export class AuthService {
     const user = await this.usersService.findOneByEmail(email);
     if (!user) return null;
     try {
-      console.log(pass, user.password);
       const isPasswordValid = await bcrypt.compare(pass, user.password);
 
       if (isPasswordValid) {
@@ -30,11 +29,14 @@ export class AuthService {
     }
   }
 
-  login(user: UserDto) {
-    const payload = { email: user.email, sub: user.id };
+  async login(user: UserDto) {
+    const tokens = await this.getTokens(user.id, user.email);
+
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+
     return {
       user: user,
-      access_token: this.jwtService.sign(payload),
+      tokens: tokens,
     };
   }
 
@@ -50,5 +52,33 @@ export class AuthService {
     });
     const { ...result } = user;
     return result;
+  }
+
+  async getTokens(userId: number, email: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        { sub: userId, email },
+        {
+          secret: process.env.SECRET_KEY,
+          expiresIn: '15m',
+        },
+      ),
+      this.jwtService.signAsync(
+        { sub: userId, email },
+        {
+          secret: process.env.SECRET_KEY,
+          expiresIn: '7d',
+        },
+      ),
+    ]);
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async updateRefreshToken(userId: number, refreshToken: string) {
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.usersService.update(userId, { hashedRefreshToken });
   }
 }

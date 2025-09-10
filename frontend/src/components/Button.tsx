@@ -26,8 +26,8 @@ export const Button: FC<ButtonProps> = (
 
   const sizes = {
     small: 'px-3 py-1.5 text-sm shadow-md',
-    medium: 'px-4 py-2 text-base shadow-md',
-    large: 'px-5 py-3 text-base shadow-lg'
+    medium: 'px-4 py-3 text-base shadow-md',
+    large: 'px-5 py-4 text-base shadow-lg'
   }
   const vars = {
     primary: 'text-white bg-primary',

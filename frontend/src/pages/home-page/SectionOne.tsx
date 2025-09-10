@@ -25,7 +25,7 @@ const SectionOne = () => {
                alt="promo-image"
                width={620}
                height={530}
-               className="rounded-lg ml-4"
+               className="rounded-lg ml-4 shadow-lg"
           />
         </div>
       </section>
