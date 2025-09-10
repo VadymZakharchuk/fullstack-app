@@ -7,17 +7,21 @@ import {
 } from 'typeorm';
 import { Transaction as UserTransaction } from '../transactions/transaction.entity';
 import bcrypt from 'bcryptjs';
-import { CounterParty } from '../counter-parties/counter-party.entity';
 import { Category } from '../categories/category.entity';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
 
+@ObjectType()
 @Entity()
 export class User {
+  @Field(() => ID)
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Field()
   @Column({ unique: true })
   email: string;
 
+  @Field()
   @Column()
   name: string;
 
@@ -27,12 +31,11 @@ export class User {
   @Column({ nullable: true })
   hashedRefreshToken?: string;
 
+  @Field(() => [UserTransaction])
   @OneToMany(() => UserTransaction, (transaction) => transaction.user)
   transactions: UserTransaction[];
 
-  @OneToMany(() => CounterParty, (counterParty) => counterParty.user)
-  counterParties: CounterParty[];
-
+  @Field(() => [Category])
   @OneToMany(() => Category, (category) => category.user)
   categories: Category[];
 

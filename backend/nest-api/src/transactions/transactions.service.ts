@@ -2,13 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from './transaction.entity';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { CreateTransactionInput } from './dto/create-transaction.input';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { User } from '../users/user.entity';
 import { CategoriesService } from '../categories/categories.service';
-import { CounterPartiesService } from '../counter-parties/counter-parties.service';
-import { CounterParty } from '../counter-parties/counter-party.entity';
 import { Category } from '../categories/category.entity';
+import { DocumentsService } from '../documents/documents.service';
 
 @Injectable()
 export class TransactionsService {
@@ -16,46 +15,45 @@ export class TransactionsService {
     @InjectRepository(Transaction)
     private transactionsRepository: Repository<Transaction>,
     private categoriesService: CategoriesService,
-    private counterPartiesService: CounterPartiesService,
+    private readonly documentsService: DocumentsService,
   ) {}
 
   // Create a new transaction
   async create(
-    createTransactionDto: CreateTransactionDto,
+    createTransactionDto: CreateTransactionInput,
     user: User,
   ): Promise<Transaction> {
-    const { categoryId, counterPartyId, ...restOfDto } = createTransactionDto;
+    let documentId: string | undefined = undefined;
 
-    let category: Category | undefined;
-    let counterParty: CounterParty | undefined;
-
-    // Перевіряємо, чи є categoryId, перш ніж шукати категорію
-    if (categoryId) {
-      category = await this.categoriesService.findOne(categoryId, user);
+    if (createTransactionDto.documentInput) {
+      const document = await this.documentsService.create(
+        createTransactionDto.documentInput,
+      );
+      documentId = document.id;
     }
 
-    // Перевіряємо, чи є counterPartyId, перш ніж шукати контрагента
-    if (counterPartyId) {
-      counterParty = await this.counterPartiesService.findOne(
-        counterPartyId,
-        user,
-      );
+    const { categoryId, ...restOfDto } = createTransactionDto;
+
+    let category: Category | undefined;
+
+    if (categoryId) {
+      category = await this.categoriesService.findOne(+categoryId, user);
     }
 
     const transaction = this.transactionsRepository.create({
       ...restOfDto,
+      documentId, // Додаємо documentId до транзакції
       category,
-      counterParty,
       user,
     });
 
     return this.transactionsRepository.save(transaction);
   }
 
-  // Get all transactions for the current user
   async findAll(user: User): Promise<Transaction[]> {
     return this.transactionsRepository.find({
       where: { user: { id: user.id } },
+      relations: ['user'],
       order: { date: 'DESC' },
     });
   }
@@ -85,6 +83,11 @@ export class TransactionsService {
   // Delete a transaction
   async remove(id: string, user: User): Promise<void> {
     const transaction = await this.findOne(id, user);
+
+    if (transaction.documentId) {
+      await this.documentsService.remove(transaction.documentId);
+    }
+
     await this.transactionsRepository.remove(transaction);
   }
 }

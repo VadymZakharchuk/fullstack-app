@@ -5,20 +5,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Transaction } from './transaction.entity';
 import { CategoriesModule } from '../categories/categories.module';
 import { UsersModule } from '../users/users.module';
-import { CounterPartiesModule } from '../counter-parties/counter-parties.module';
 import { PdfParsingService } from './pdf-parsing.service';
 import { TransactionCategorizationService } from './transaction-categorization.service';
 import { CategoriesService } from '../categories/categories.service';
-import { CounterPartiesService } from '../counter-parties/counter-parties.service';
 import { Category } from '../categories/category.entity';
-import { CounterParty } from '../counter-parties/counter-party.entity';
+import { DocumentsModule } from '../documents/documents.module';
+import { TransactionsResolver } from './transactions.resolver';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Transaction, Category, CounterParty]),
+    TypeOrmModule.forFeature([Transaction, Category]),
     forwardRef(() => UsersModule),
     forwardRef(() => CategoriesModule),
-    forwardRef(() => CounterPartiesModule),
+    DocumentsModule,
   ],
   controllers: [TransactionsController],
   providers: [
@@ -26,7 +25,7 @@ import { CounterParty } from '../counter-parties/counter-party.entity';
     PdfParsingService,
     TransactionCategorizationService,
     CategoriesService,
-    CounterPartiesService,
+    TransactionsResolver,
   ],
 })
 export class TransactionsModule {}

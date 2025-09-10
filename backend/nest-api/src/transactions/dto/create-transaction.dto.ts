@@ -19,10 +19,6 @@ export class CreateTransactionDto {
   @IsNotEmpty({ message: 'The category ID cannot be empty.' })
   categoryId?: number;
 
-  @IsNumber({}, { message: 'The counter party ID must be a number.' })
-  @IsNotEmpty({ message: 'The counter party ID cannot be empty.' })
-  counterPartyId?: number;
-
   @IsDateString({}, { message: 'The date must be a valid ISO 8601 string.' })
   @IsNotEmpty({ message: 'The date cannot be empty.' })
   date: Date;

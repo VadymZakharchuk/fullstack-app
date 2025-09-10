@@ -6,7 +6,7 @@ import { User } from './user.entity';
 import { AuthModule } from '../auth/auth.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { CategoriesModule } from '../categories/categories.module';
-import { CounterPartiesModule } from '../counter-parties/counter-parties.module';
+import { UsersResolver } from './users.resolver';
 
 @Module({
   imports: [
@@ -14,10 +14,9 @@ import { CounterPartiesModule } from '../counter-parties/counter-parties.module'
     forwardRef(() => AuthModule),
     forwardRef(() => TransactionsModule),
     forwardRef(() => CategoriesModule),
-    forwardRef(() => CounterPartiesModule),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UsersResolver],
   exports: [UsersService],
 })
 export class UsersModule {}

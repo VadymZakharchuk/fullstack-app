@@ -38,4 +38,9 @@ export class UsersService {
     Object.assign(user, attrs);
     return this.usersRepository.save(user);
   }
+
+  async remove(id: number): Promise<boolean> {
+    const result = await this.usersRepository.delete(id);
+    return (result.affected ?? 0) > 0;
+  }
 }

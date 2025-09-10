@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TransactionsService } from './transactions.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { CreateTransactionInput } from './dto/create-transaction.input';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { User } from '../users/user.entity';
 import { GetUser } from '../common/get-user.decorator';
@@ -35,10 +35,10 @@ export class TransactionsController {
 
   @Post()
   async create(
-    @Body() createTransactionDto: CreateTransactionDto,
+    @Body() createTransactionGraphql: CreateTransactionInput,
     @GetUser() user: User,
   ) {
-    return this.transactionsService.create(createTransactionDto, user);
+    return this.transactionsService.create(createTransactionGraphql, user);
   }
 
   @Get()
