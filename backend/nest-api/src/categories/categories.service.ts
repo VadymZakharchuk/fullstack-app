@@ -1,11 +1,10 @@
-// src/categories/categories.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './category.entity';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
 import { User } from '../users/user.entity';
+import { CreateCategoryInput } from './dto/create-category.input';
+import { UpdateCategoryInput } from './dto/update-category.input';
 
 @Injectable()
 export class CategoriesService {
@@ -15,11 +14,11 @@ export class CategoriesService {
   ) {}
 
   async create(
-    createCategoryDto: CreateCategoryDto,
+    createCategoryInput: CreateCategoryInput,
     user: User,
   ): Promise<Category> {
     const category = this.categoriesRepository.create({
-      ...createCategoryDto,
+      ...createCategoryInput,
       user,
     });
     return this.categoriesRepository.save(category);
@@ -43,11 +42,11 @@ export class CategoriesService {
 
   async update(
     id: number,
-    updateCategoryDto: UpdateCategoryDto,
+    updateCategoryInput: UpdateCategoryInput,
     user: User,
   ): Promise<Category> {
     const category = await this.findOne(id, user);
-    Object.assign(category, updateCategoryDto);
+    Object.assign(category, updateCategoryInput);
     return this.categoriesRepository.save(category);
   }
 

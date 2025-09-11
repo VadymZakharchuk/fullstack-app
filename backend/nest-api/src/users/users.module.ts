@@ -12,7 +12,7 @@ import { UsersResolver } from './users.resolver';
   imports: [
     TypeOrmModule.forFeature([User]),
     forwardRef(() => AuthModule),
-    forwardRef(() => TransactionsModule),
+    forwardRef(() => AuthModule),
     forwardRef(() => CategoriesModule),
   ],
   controllers: [UsersController],

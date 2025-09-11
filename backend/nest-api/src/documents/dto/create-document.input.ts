@@ -2,7 +2,7 @@
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
-export class CreateDocumentDto {
+export class CreateDocumentInput {
   @Field()
   fileName: string;
 

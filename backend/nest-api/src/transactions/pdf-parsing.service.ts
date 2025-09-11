@@ -1,64 +1,57 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as pdfParse from 'pdf-parse';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 
 @Injectable()
 export class PdfParsingService {
-  async parsePdf(buffer: Buffer) {
+  async parsePdf(buffer: Buffer): Promise<CreateTransactionDto[]> {
     let data;
     try {
-      // pdf-parse повертає Promise з об'єктом, що містить текст
       data = await pdfParse(buffer);
     } catch (error: any) {
       throw new InternalServerErrorException('PDF handling error.', error);
     }
 
     const fullText = data.text;
-
     return this.extractTransactionsFromText(fullText);
   }
 
-  private extractTransactionsFromText(text: string) {
-    const transactions = [];
+  private extractTransactionsFromText(text: string): CreateTransactionDto[] {
+    const transactions: CreateTransactionDto[] = [];
+    const lines = text.split('\n');
 
-    // Регулярний вираз для захоплення блоку транзакції.
-    // Він починається з дати, часу і захоплює весь текст до наступної дати або до кінця рядка.
-    const transactionBlockRegex =
-      /(\d{2}\.\d{2}\.\d{4})\s*(\d{2}:\d{2}:\d{2})\s*([\s\S]+?)(?=\d{2}\.\d{2}\.\d{4}|Z)/g;
+    // Регулярний вираз для однієї лінії транзакції
+    const transactionRegex =
+      /^(\d{2}\.\d{2}\.\d{4})\s+(\d{2}:\d{2}:\d{2})\s+([^\d]+?)\s+(-?\d{1,3}(?:\s\d{3})*,\d{2})\s+([A-Z]{3})$/;
 
-    let match;
-    while ((match = transactionBlockRegex.exec(text)) !== null) {
-      const dateString = match[1];
-      const timeString = match[2];
-      const blockContent = match[3];
+    for (const line of lines) {
+      const match = line.trim().match(transactionRegex);
+      if (match) {
+        const [, dateString, timeString, description, amountString] = match;
 
-      // Другий регулярний вираз для детального парсингу вмісту блоку.
-      // Він шукає опис, MCC та суми, ігноруючи переноси рядків.
-      const blockDetailsRegex =
-        /^(.*?)\s*(\d{4})?\s*(-?\d{1,3}(?:\s\d{3})*[\s,]\d{2})\s*(-?\d{1,3}(?:\s\d{3})*[\s,]\d{2})\s*([A-Z]{3})/m;
+        // Парсинг дати
+        const date = new Date(
+          `${dateString.split('.').reverse().join('-')}T${timeString}`,
+        );
 
-      const blockMatch = blockContent.match(blockDetailsRegex);
-      console.log(match);
-      if (blockMatch) {
-        const description = blockMatch[1].trim();
-        const mcc = blockMatch[2] || '';
-        const amountString = blockMatch[3].replace(',', '.').replace(/\s/g, '');
+        // Парсинг суми та типу
+        const amount = parseFloat(
+          amountString.replace(/\s/g, '').replace(',', '.'),
+        );
+        const type = amount >= 0 ? 'income' : 'expense';
 
-        const transaction = {
-          date: new Date(
-            `${dateString.split('.').reverse().join('-')}T${timeString}Z`,
-          ),
-          description,
-          mcc,
-          amount: parseFloat(amountString),
-          type: amountString.startsWith('-')
-            ? 'expense'
-            : ('income' as 'expense' | 'income'),
+        // Формування DTO
+        const transactionDto: CreateTransactionDto = {
+          date,
+          description: description.trim(),
+          amount: Math.abs(amount),
+          type,
         };
 
-        transactions.push(transaction);
+        transactions.push(transactionDto);
       }
     }
-    console.log(transactions);
-    return []; // transactions;
+
+    return transactions;
   }
 }

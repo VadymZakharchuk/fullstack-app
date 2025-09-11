@@ -1,116 +1,76 @@
 import {
   Controller,
   Post,
-  Body,
-  UseGuards,
-  Request,
-  Get,
-  Param,
-  Patch,
-  Delete,
-  ParseUUIDPipe,
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { TransactionsService } from './transactions.service';
-import { CreateTransactionInput } from './dto/create-transaction.input';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { User } from '../users/user.entity';
-import { GetUser } from '../common/get-user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express } from 'express';
 import { PdfParsingService } from './pdf-parsing.service';
-import { TransactionCategorizationService } from './transaction-categorization.service';
+import { DocumentsService } from '../documents/documents.service';
+import { TransactionsService } from './transactions.service';
+import { User } from '../users/user.entity';
+import { AuthGuard } from '@nestjs/passport';
+
+interface RequestWithUser extends Request {
+  user: User;
+}
 
 @Controller('transactions')
-@UseGuards(AuthGuard('jwt'))
 export class TransactionsController {
   constructor(
-    private readonly transactionsService: TransactionsService,
     private readonly pdfParsingService: PdfParsingService,
-    private readonly transactionCategorizationService: TransactionCategorizationService,
+    private readonly documentsService: DocumentsService,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
-  @Post()
-  async create(
-    @Body() createTransactionGraphql: CreateTransactionInput,
-    @GetUser() user: User,
-  ) {
-    return this.transactionsService.create(createTransactionGraphql, user);
-  }
-
-  @Get()
-  async findAll(@GetUser() user: User) {
-    return this.transactionsService.findAll(user);
-  }
-
-  @Get(':id')
-  async findOne(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @GetUser() user: User,
-  ) {
-    return this.transactionsService.findOne(id, user);
-  }
-
-  @Patch(':id')
-  async update(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() updateTransactionDto: UpdateTransactionDto,
-    @GetUser() user: User,
-  ) {
-    return this.transactionsService.update(id, updateTransactionDto, user);
-  }
-
-  @Delete(':id')
-  async remove(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @GetUser() user: User,
-  ) {
-    return this.transactionsService.remove(id, user);
-  }
-
   @Post('upload')
+  @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @GetUser() user: User,
+    @Req() req: RequestWithUser,
   ) {
-    let parsedTransactions;
-
-    if (file.mimetype === 'application/pdf') {
-      parsedTransactions = await this.pdfParsingService.parsePdf(file.buffer);
-    } else {
-      throw new BadRequestException(
-        'Непідтримуваний формат файлу. Будь ласка, завантажте PDF.',
-      );
+    if (!file || !file.buffer) {
+      throw new BadRequestException('Файл відсутній або пошкоджений');
     }
+    const user: User = req.user;
 
-    const savedTransactions = [];
-    if (parsedTransactions && parsedTransactions.length > 0) {
-      for (const transactionData of parsedTransactions) {
-        // Зберігаємо кожну транзакцію в базу даних
-        const categorizedTransaction =
-          await this.transactionCategorizationService.assignCategoriesAndCounterParties(
-            transactionData,
-          );
-        const createdTransaction = await this.transactionsService.create(
-          categorizedTransaction,
-          user,
-        );
-        savedTransactions.push(createdTransaction);
-      }
-    } else {
-      return {
-        message: 'File handled but transactions are missed.',
-        count: 0,
-      };
-    }
+    // 1. Створення об'єкта CreateDocumentInput з даних файлу
+    const createDocumentInput = {
+      name: file.originalname,
+      fileName: file.originalname,
+      url: '',
+      mimeType: file.mimetype,
+      size: file.size,
+      content: file.buffer.toString('base64'),
+    };
 
+    const document = await this.documentsService.create(
+      createDocumentInput,
+      user,
+    );
+
+    // 3. Парсинг транзакцій з буфера файлу
+    const transactions = await this.pdfParsingService.parsePdf(file.buffer);
+
+    // 4. Збереження транзакцій у БД
+    // const savedTransactions = await this.transactionsService.createMany(
+    //   transactions,
+    //   document.id,
+    //   user,
+    // );
+
+    // return {
+    //   message: `Успішно імпортовано ${savedTransactions.length} транзакцій.`,
+    //   count: savedTransactions.length,
+    //   documentId: document.id,
+    // };
     return {
-      message: 'All transactions have been imported',
-      count: savedTransactions.length,
+      count: transactions.length,
+      documentId: document.id,
     };
   }
 }

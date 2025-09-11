@@ -26,7 +26,7 @@ export class Transaction {
   @Column()
   description: string;
 
-  @Field()
+  @Field(() => Category, { nullable: true })
   @ManyToOne(() => Category, (category) => category.transactions)
   category: Category;
 

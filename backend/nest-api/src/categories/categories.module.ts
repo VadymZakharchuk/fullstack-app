@@ -1,5 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { CategoriesController } from './categories.controller';
+import { CategoriesResolver } from './categories.resolver';
 import { CategoriesService } from './categories.service';
 import { Category } from './category.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,8 +10,7 @@ import { UsersModule } from '../users/users.module';
     TypeOrmModule.forFeature([Category]),
     forwardRef(() => UsersModule),
   ],
-  controllers: [CategoriesController],
-  providers: [CategoriesService],
+  providers: [CategoriesService, CategoriesResolver],
   exports: [CategoriesService],
 })
 export class CategoriesModule {}

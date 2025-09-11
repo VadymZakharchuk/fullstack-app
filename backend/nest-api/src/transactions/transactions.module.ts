@@ -1,22 +1,27 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { TransactionsController } from './transactions.controller';
-import { TransactionsService } from './transactions.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MulterModule } from '@nestjs/platform-express';
+import { TransactionsService } from './transactions.service';
+import { TransactionsResolver } from './transactions.resolver';
 import { Transaction } from './transaction.entity';
-import { CategoriesModule } from '../categories/categories.module';
-import { UsersModule } from '../users/users.module';
 import { PdfParsingService } from './pdf-parsing.service';
 import { TransactionCategorizationService } from './transaction-categorization.service';
-import { CategoriesService } from '../categories/categories.service';
-import { Category } from '../categories/category.entity';
+import { TransactionsController } from './transactions.controller';
+import { UsersModule } from '../users/users.module';
+import { CategoriesModule } from '../categories/categories.module';
 import { DocumentsModule } from '../documents/documents.module';
-import { TransactionsResolver } from './transactions.resolver';
+import { Category } from '../categories/category.entity';
+import { memoryStorage, StorageEngine } from 'multer';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Transaction, Category]),
+    MulterModule.register({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
+      storage: memoryStorage() as StorageEngine,
+    }),
     forwardRef(() => UsersModule),
-    forwardRef(() => CategoriesModule),
+    CategoriesModule,
     DocumentsModule,
   ],
   controllers: [TransactionsController],
@@ -24,8 +29,8 @@ import { TransactionsResolver } from './transactions.resolver';
     TransactionsService,
     PdfParsingService,
     TransactionCategorizationService,
-    CategoriesService,
     TransactionsResolver,
   ],
+  exports: [TransactionsService],
 })
 export class TransactionsModule {}

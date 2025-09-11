@@ -1,6 +1,6 @@
 // src/transactions/dto/create-transaction.input.ts
 import { InputType, Field, Float } from '@nestjs/graphql';
-import { CreateDocumentDto } from '../../documents/dto/create-document.dto';
+import { CreateDocumentInput } from '../../documents/dto/create-document.input';
 
 @InputType()
 export class CreateTransactionInput {
@@ -22,6 +22,6 @@ export class CreateTransactionInput {
   @Field({ nullable: true })
   documentId?: string;
 
-  @Field(() => CreateDocumentDto, { nullable: true })
-  documentInput?: CreateDocumentDto;
+  @Field(() => CreateDocumentInput, { nullable: true })
+  documentInput?: CreateDocumentInput;
 }

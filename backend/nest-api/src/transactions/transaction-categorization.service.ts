@@ -1,4 +1,3 @@
-// src/transactions/transaction-categorization.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,19 +13,21 @@ export class TransactionCategorizationService {
 
   async assignCategoriesAndCounterParties(
     transactionDto: CreateTransactionDto,
-  ) {
+  ): Promise<CreateTransactionDto> {
     const categories = await this.categoryRepository.find();
+    const resultDto = { ...transactionDto }; // Створюємо новий об'єкт
+
     // Логіка для категорій
     for (const category of categories) {
       if (
-        transactionDto.description
+        resultDto.description
           .toLowerCase()
           .includes(category.name.toLowerCase())
       ) {
-        transactionDto.categoryId = category.id;
+        resultDto.categoryId = category.id;
         break;
       }
     }
-    return transactionDto;
+    return resultDto;
   }
 }

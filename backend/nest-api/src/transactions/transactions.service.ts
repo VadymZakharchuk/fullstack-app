@@ -3,11 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from './transaction.entity';
 import { CreateTransactionInput } from './dto/create-transaction.input';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { UpdateTransactionInput } from './dto/update-transaction.input';
 import { User } from '../users/user.entity';
 import { CategoriesService } from '../categories/categories.service';
 import { Category } from '../categories/category.entity';
 import { DocumentsService } from '../documents/documents.service';
+import { TransactionCategorizationService } from './transaction-categorization.service';
 
 @Injectable()
 export class TransactionsService {
@@ -16,33 +17,41 @@ export class TransactionsService {
     private transactionsRepository: Repository<Transaction>,
     private categoriesService: CategoriesService,
     private readonly documentsService: DocumentsService,
+    private readonly transactionCategorizationService: TransactionCategorizationService,
   ) {}
 
-  // Create a new transaction
   async create(
-    createTransactionDto: CreateTransactionInput,
+    createTransactionInput: CreateTransactionInput,
     user: User,
   ): Promise<Transaction> {
-    let documentId: string | undefined = undefined;
+    const { categoryId, documentInput, ...restOfDto } = createTransactionInput;
 
-    if (createTransactionDto.documentInput) {
-      const document = await this.documentsService.create(
-        createTransactionDto.documentInput,
-      );
+    let documentId: string | undefined = undefined;
+    if (documentInput) {
+      const document = await this.documentsService.create(documentInput, user);
       documentId = document.id;
     }
 
-    const { categoryId, ...restOfDto } = createTransactionDto;
-
     let category: Category | undefined;
-
     if (categoryId) {
       category = await this.categoriesService.findOne(+categoryId, user);
+    } else {
+      // Якщо категорія не надана, використовуємо сервіс для її визначення
+      const categorizedDto =
+        await this.transactionCategorizationService.assignCategoriesAndCounterParties(
+          createTransactionInput,
+        );
+      if (categorizedDto.categoryId) {
+        category = await this.categoriesService.findOne(
+          +categorizedDto.categoryId,
+          user,
+        );
+      }
     }
 
     const transaction = this.transactionsRepository.create({
       ...restOfDto,
-      documentId, // Додаємо documentId до транзакції
+      documentId,
       category,
       user,
     });
@@ -53,12 +62,10 @@ export class TransactionsService {
   async findAll(user: User): Promise<Transaction[]> {
     return this.transactionsRepository.find({
       where: { user: { id: user.id } },
-      relations: ['user'],
       order: { date: 'DESC' },
     });
   }
 
-  // Find a single transaction by ID and user
   async findOne(id: string, user: User): Promise<Transaction> {
     const transaction = await this.transactionsRepository.findOne({
       where: { id, user: { id: user.id } },
@@ -69,25 +76,18 @@ export class TransactionsService {
     return transaction;
   }
 
-  // Update a transaction
   async update(
     id: string,
-    updateTransactionDto: UpdateTransactionDto,
+    updateTransactionInput: UpdateTransactionInput,
     user: User,
   ): Promise<Transaction> {
     const transaction = await this.findOne(id, user);
-    Object.assign(transaction, updateTransactionDto);
+    Object.assign(transaction, updateTransactionInput);
     return this.transactionsRepository.save(transaction);
   }
 
-  // Delete a transaction
   async remove(id: string, user: User): Promise<void> {
     const transaction = await this.findOne(id, user);
-
-    if (transaction.documentId) {
-      await this.documentsService.remove(transaction.documentId);
-    }
-
     await this.transactionsRepository.remove(transaction);
   }
 }

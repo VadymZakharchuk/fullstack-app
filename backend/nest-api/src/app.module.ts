@@ -12,6 +12,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DocumentsModule } from './documents/documents.module';
+import { FileUpload } from 'graphql-upload-ts';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { DocumentsModule } from './documents/documents.module';
       driver: ApolloDriver,
       autoSchemaFile: 'src/schema.gql',
       sortSchema: true,
+      playground: true,
     }),
 
     UsersModule,

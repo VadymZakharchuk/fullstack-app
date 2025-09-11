@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 
 export type DocumentDocument = HydratedDocument<Document>;
@@ -21,6 +21,10 @@ export class Document {
   @Field()
   @Prop({ required: true })
   content: string;
+
+  @Field()
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: string;
 }
 
 export const DocumentSchema = SchemaFactory.createForClass(Document);

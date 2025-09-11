@@ -31,7 +31,7 @@ const FileUploader: React.FC = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:3000/transactions/upload',
+        'https://localhost:3000/transactions/upload',
         formData,
         {
           headers: {
