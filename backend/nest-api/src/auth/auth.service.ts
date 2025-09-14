@@ -4,11 +4,13 @@ import * as bcrypt from 'bcryptjs';
 import { UserDto } from '../users/dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<UserDto | null> {
@@ -59,14 +61,14 @@ export class AuthService {
       this.jwtService.signAsync(
         { sub: userId, email },
         {
-          secret: process.env.SECRET_KEY,
-          expiresIn: '15m',
+          secret: this.configService.get<string>('SECRET_KEY'),
+          expiresIn: '5m',
         },
       ),
       this.jwtService.signAsync(
         { sub: userId, email },
         {
-          secret: process.env.SECRET_KEY,
+          secret: this.configService.get<string>('SECRET_REFRESH_KEY'),
           expiresIn: '7d',
         },
       ),
@@ -80,5 +82,11 @@ export class AuthService {
   async updateRefreshToken(userId: number, refreshToken: string) {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.usersService.update(userId, { hashedRefreshToken });
+  }
+
+  async refreshTokens(userId: number, email: string) {
+    const tokens = await this.getTokens(userId, email);
+    await this.updateRefreshToken(userId, tokens.refreshToken);
+    return tokens;
   }
 }

@@ -12,7 +12,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DocumentsModule } from './documents/documents.module';
-import { FileUpload } from 'graphql-upload-ts';
 
 @Module({
   imports: [

@@ -9,6 +9,7 @@ import PricingPage from "../pages/pricing-page/PricingPage";
 import BlogPage from "../pages/blog-page/BlogPage";
 import AboutPage from "../pages/about-page/AboutPage";
 import NotFoundPage from "../pages/NotFoundPage";
+import SettingsPage from "../pages/settings-page/SettingsPage.tsx";
 
 export const router = createBrowserRouter([
   // Публічні маршрути
@@ -16,14 +17,14 @@ export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <LoginPage /> },
   { path: "/blog", element: <BlogPage /> },
-
+  { path: "/about", element: <AboutPage /> },
+  { path: "/pricing", element: <PricingPage /> },
+  { path: "/features", element: <FeaturesPage /> },
   {
     element: <PrivateRoute />,
     children: [
       { path: "/main", element: <MainPage /> },
-      { path: "/features", element: <FeaturesPage /> },
-      { path: "/pricing", element: <PricingPage /> },
-      { path: "/about", element: <AboutPage /> },
+      { path: "/settings", element: <SettingsPage /> },
     ],
   },
 

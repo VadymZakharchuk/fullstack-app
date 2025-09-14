@@ -1,47 +1,34 @@
 import {
-  ArrowRightLeft,
-  ChartPie, LogOut, type LucideProps,
+  LogOut,
+  type LucideProps,
   Settings,
-  Shell,
-  TriangleAlert
 } from "lucide-react";
 import React from "react";
-import {Link} from "react-router-dom";
-import {logout} from "../../store/auth/authSlice.ts";
-import {useDispatch} from "react-redux";
+import { logout } from "../../store/auth/authSlice.ts";
+import { useDispatch } from "react-redux";
 
-const Sidebar = () => {
+type ComponentName = 'Transactions' | 'Analytics' | 'Anomalies' | 'Forecast';
+
+interface NavigationItem {
+  component: ComponentName;
+  name: string;
+  icon: React.ComponentType<LucideProps>;
+}
+
+interface SidebarProps {
+  navigation: NavigationItem[];
+  onNavigate: (component: ComponentName) => void;
+}
+const Sidebar: React.ComponentType<SidebarProps> = ({ navigation, onNavigate }: SidebarProps) => {
   const dispatch = useDispatch();
 
   const logOut = async () => {
     dispatch(logout());
   }
-  const navigation = [
-    {
-      href: '/',
-      name: 'Транзакції',
-      icon: ArrowRightLeft,
-    },
-    {
-      href: '/',
-      name: 'Аналітика та звітність',
-      icon: ChartPie,
-    },
-    {
-      href: '/',
-      name: 'АІ прогнозування',
-      icon: Shell,
-    },
-    {
-      href: '/',
-      name: 'Виявлення аномалій',
-      icon: TriangleAlert,
-    }
-  ]
 
   const navsFooter = [
     {
-      href: '/',
+      href: '/settings',
       name: 'Налаштування',
       icon: Settings,
     },
@@ -61,23 +48,26 @@ const Sidebar = () => {
       <nav
         className="fixed top-0 left-0 w-full h-full border-r bg-white space-y-8 sm:w-80">
         <div className="flex flex-col h-full">
-          <Link to="/" className='h-20 flex items-center px-8 shadow-xl'>
+          <a href="/" className='h-20 flex items-center px-8 shadow-xl'>
             <img
               src='/img/B_Logo.png'
               width={280}
               height={45}
               alt="Balancio logo"
             />
-          </Link>
+          </a>
           <div className="mt-4 flex-1 flex flex-col h-full overflow-auto">
             <ul className="px-4 text-sm font-medium flex-1">
               {
                 navigation.map((item, idx) => (
                   <li key={idx}>
-                    <a href={item.href} className="flex items-center gap-x-2 text-gray-600 p-2 rounded-lg  hover:bg-gray-50 active:bg-gray-100 duration-150">
+                    <span
+                      onClick={() => onNavigate(item.component)}
+                      className="flex items-center gap-x-2 text-gray-600 p-2 rounded-lg hover:bg-gray-50 active:bg-gray-100 duration-150 cursor-pointer"
+                    >
                       <div className="text-body-text">{renderIcon(item.icon)}</div>
                       {item.name}
-                    </a>
+                    </span>
                   </li>
                 ))
               }
