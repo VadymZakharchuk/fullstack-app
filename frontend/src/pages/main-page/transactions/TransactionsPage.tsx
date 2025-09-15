@@ -1,6 +1,6 @@
 import FileUploader from "../../../components/FileUploader.tsx";
 
-const Transactions = () => {
+const TransactionsPage = () => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg">
       <h2 className="text-2xl font-bold">Транзакції</h2>
@@ -10,4 +10,4 @@ const Transactions = () => {
     </div>
   );
 };
-export default Transactions;
+export default TransactionsPage;

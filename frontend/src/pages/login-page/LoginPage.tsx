@@ -16,6 +16,7 @@ import { useDispatch } from "react-redux";
 export interface LoginFormData {
   email: string;
   password: string;
+  passwordConfirm?: string;
   name? : string;
 }
 
@@ -62,7 +63,12 @@ const LoginPage = () => {
       }
     } else {
       try {
-        const response = await registerUser(data);
+        const registerPayload = {
+          email: data.email,
+          password: data.password,
+          name: data.name || 'Anonymous User',
+        };
+        const response = await registerUser(registerPayload);
         if (response.includes('Account with email')) {
           setShowSuccessToast(true);
         }
@@ -119,7 +125,7 @@ const LoginPage = () => {
                 type="password"
                 id="passwordConfirm"
                 className={inputClass}
-                {...register("password", {
+                {...register("passwordConfirm", {
                   required: "Поле пароль є обов'язковим",
                   minLength: {
                     value: 6,
@@ -131,11 +137,12 @@ const LoginPage = () => {
               {errors.password && <span className={errorClass}>{errors.password.message as string}</span>}
             </div>
               <div className="flex flex-col items-center justify-between my-4">
-                <label htmlFor="password" className="self-start text-sm">Name or Nick (optional)</label>
+                <label htmlFor="user-name" className="self-start text-sm">Name or Nick (optional)</label>
                 <input
                   type="text"
                   id="user-name"
                   className={inputClass}
+                  {...register("name")}
                 />
               </div>
             </>

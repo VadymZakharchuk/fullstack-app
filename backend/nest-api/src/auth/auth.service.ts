@@ -3,7 +3,7 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcryptjs';
 import { UserDto } from '../users/dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
@@ -42,8 +42,12 @@ export class AuthService {
     };
   }
 
-  async register(body: LoginDto): Promise<UserDto | string> {
+  async register(body: RegisterDto): Promise<UserDto | string> {
     const { password, ...userData } = body;
+    const isEmailRegistered = this.usersService.findOneByEmail(userData.email);
+    if (isEmailRegistered !== null) {
+      return `EMail ${userData.email} is already registered. Registration failed`;
+    }
     const dbUser = await this.usersService.findOneByEmail(body.email);
     if (dbUser) {
       return `Can't create new account. Account with email ${body.email} already exists`;

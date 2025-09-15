@@ -6,7 +6,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Transaction as UserTransaction } from '../transactions/transaction.entity';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import { Category } from '../categories/category.entity';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 
@@ -21,8 +21,8 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Field()
-  @Column()
+  @Field({ nullable: true })
+  @Column({ nullable: true })
   name: string;
 
   @Column({ select: false })

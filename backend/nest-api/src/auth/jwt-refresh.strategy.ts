@@ -27,7 +27,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
     private usersService: UsersService,
   ) {
     const secretOrKey = configService.get<string>('SECRET_REFRESH_KEY');
-    console.log('secretOrKey: ', secretOrKey);
     if (!secretOrKey) {
       throw new Error('SECRET_REFRESH_KEY is missed in config');
     }
@@ -45,14 +44,12 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
   async validate(req: RequestWithCookies, payload: Payload) {
     const refreshToken = req.cookies?.refreshToken;
-    console.log('Refresh token from cookies in validate():', refreshToken);
     const user = await this.usersService.findOneById(payload.sub);
 
     if (!user || !user.hashedRefreshToken || !refreshToken) {
       throw new UnauthorizedException('Invalid token');
     }
-    console.log('User found:', !!user);
-    console.log('User has hashedRefreshToken:', !!user?.hashedRefreshToken);
+
     const isRefreshTokenMatching = await bcrypt.compare(
       refreshToken,
       user.hashedRefreshToken,

@@ -18,7 +18,7 @@ const SettingsPage = () => {
   // Використання хука useQuery для виконання запиту
   // Ми передаємо id=5 як змінну для запиту
   const { data, loading, error } = useQuery(GET_USER_QUERY, {
-    variables: { userId: 5 },
+    variables: { userId: 8 },
   });
 
   // Виводимо повідомлення, поки дані завантажуються

@@ -17,7 +17,6 @@ export const login = async (data: LoginFormData, dispatch: AppDispatch) => {
       password: data.password,
     });
     const { tokens, user } = response.data;
-    console.log('login->>> ',response.data)
     if (tokens.accessToken) {
       dispatch(setAuth({ user: user, token: tokens.accessToken }));
     }
@@ -36,6 +35,7 @@ export const registerUser = async (data: LoginFormData) => {
     const response = await api.post(`${baseURL}/auth/register`, {
       email: data.email,
       password: data.password,
+      name: data.name,
     });
     return response.data;
   } catch (error) {

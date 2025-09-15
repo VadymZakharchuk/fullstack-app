@@ -1,4 +1,4 @@
-const Analytics = () => {
+const AnalyticsPage = () => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg text-balancio">
       <h2 className="text-2xl font-bold">Аналітика та звітність</h2>
@@ -6,4 +6,4 @@ const Analytics = () => {
     </div>
   );
 };
-export default Analytics;
+export default AnalyticsPage;

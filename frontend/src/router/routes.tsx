@@ -10,6 +10,10 @@ import BlogPage from "../pages/blog-page/BlogPage";
 import AboutPage from "../pages/about-page/AboutPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import SettingsPage from "../pages/settings-page/SettingsPage.tsx";
+import AnalyticsPage from "../pages/main-page/analytics/AnalyticsPage.tsx";
+import AnomaliesPage from "../pages/main-page/anomalies/AnomaliesPage.tsx";
+import ForecastPage from "../pages/main-page/forecast/ForecastPage.tsx";
+import TransactionsPage from "../pages/main-page/transactions/TransactionsPage.tsx";
 
 export const router = createBrowserRouter([
   // Публічні маршрути
@@ -23,7 +27,16 @@ export const router = createBrowserRouter([
   {
     element: <PrivateRoute />,
     children: [
-      { path: "/main", element: <MainPage /> },
+      {
+        path: "/main",
+        element: <MainPage />,
+        children: [
+          { path: "transactions", element: <TransactionsPage /> },
+          { path: "analytics", element: <AnalyticsPage /> },
+          { path: "forecast", element: <ForecastPage /> },
+          { path: "anomalies", element: <AnomaliesPage /> },
+        ]
+      },
       { path: "/settings", element: <SettingsPage /> },
     ],
   },

@@ -1,4 +1,4 @@
-const Anomalies = () => {
+const AnomaliesPage = () => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg text-balancio">
       <h2 className="text-2xl font-bold">Виявлення аномалій</h2>
@@ -6,4 +6,4 @@ const Anomalies = () => {
     </div>
   );
 };
-export default Anomalies;
+export default AnomaliesPage;

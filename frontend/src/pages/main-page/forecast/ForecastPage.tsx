@@ -1,4 +1,4 @@
-const Forecast = () => {
+const ForecastPage = () => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg text-balancio">
       <h2 className="text-2xl font-bold">АІ прогнозування</h2>
@@ -6,4 +6,4 @@ const Forecast = () => {
     </div>
   );
 };
-export default Forecast;
+export default ForecastPage;
