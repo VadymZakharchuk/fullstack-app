@@ -120,7 +120,7 @@ export class XlsxParsingService {
       // Десяткова частина - це час.
       const dateInMilliseconds = (cell.value - 25569) * 86400000;
       const date = new Date(dateInMilliseconds);
-
+      console.log('number->', cell.value);
       if (isNaN(date.getTime())) {
         throw new InternalServerErrorException(
           'Некоректний числовий формат дати.',
@@ -130,9 +130,10 @@ export class XlsxParsingService {
     }
     // Якщо значення є рядком, парсимо його з урахуванням часу
     else if (typeof cell.value === 'string') {
-      const dateRegex = /(\d{2}\.\d{2}\.\d{4})\s+(\d{2}:\d{2}:\d{2})/;
-      const match = cell.value.match(dateRegex);
+      const dateTimeRegex = /(\d{2}\.\d{2}\.\d{4})\s+(\d{2}:\d{2}:\d{2})/;
+      const dateOnlyRegex = /(\d{2}\.\d{2}\.\d{4})/;
 
+      let match = cell.value.match(dateTimeRegex);
       if (match) {
         const [, dateString, timeString] = match;
         const [day, month, year] = dateString.split('.');
@@ -148,14 +149,39 @@ export class XlsxParsingService {
 
         if (isNaN(date.getTime())) {
           throw new InternalServerErrorException(
-            'Некоректний рядковий формат дати.',
+            'Некоректний формат дати з часом.',
+          );
+        }
+        return date;
+      }
+
+      match = cell.value.match(dateOnlyRegex);
+      if (match) {
+        const [, dateString] = match;
+        const [day, month, year] = dateString.split('.');
+
+        // Створюємо дату без часу
+        const date = new Date(
+          Date.UTC(
+            parseInt(year, 10),
+            parseInt(month, 10) - 1,
+            parseInt(day, 10),
+            0,
+            0,
+            0,
+          ),
+        );
+
+        if (isNaN(date.getTime())) {
+          throw new InternalServerErrorException(
+            'Некоректний формат дати без часу.',
           );
         }
         return date;
       }
     }
     throw new InternalServerErrorException(
-      'Непідтримуваний формат дати в комірці.',
+      'Непідтримуваний формат дати в осередку.',
     );
   }
 
