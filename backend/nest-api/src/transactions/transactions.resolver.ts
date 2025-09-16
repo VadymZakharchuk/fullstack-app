@@ -17,8 +17,8 @@ import { UpdateTransactionInput } from './dto/update-transaction.input';
 import { User } from '../users/user.entity';
 import { GqlUser } from '../common/gql-user.decorator';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
-import { PdfParsingService } from './pdf-parsing.service';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
+import { XlsxParsingService } from './xlsx-parsing.service';
 
 @Resolver(() => Transaction)
 @UseGuards(GqlAuthGuard)
@@ -26,7 +26,7 @@ export class TransactionsResolver {
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly documentsService: DocumentsService,
-    private readonly pdfParsingService: PdfParsingService,
+    private readonly xlsxParsingService: XlsxParsingService,
   ) {}
 
   @Query(() => [Transaction])
@@ -90,35 +90,56 @@ export class TransactionsResolver {
   }
 
   @Mutation(() => [Transaction])
-  async uploadTransactionsFromPdf(
+  async uploadTransactionsFromXlsx(
     @Args({ name: 'file', type: () => GraphQLUpload })
     file: FileUpload,
     @GqlUser() user: User,
   ): Promise<Transaction[]> {
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    const { createReadStream, mimetype } = await file;
+    const { mimetype, filename } = file;
+    const stream = file.createReadStream();
 
-    const stream = createReadStream();
     const chunks: Buffer[] = [];
     for await (const chunk of stream) {
       chunks.push(chunk);
     }
     const buffer = Buffer.concat(chunks);
 
-    if (mimetype !== 'application/pdf') {
-      throw new Error('Unsupported file format. Please upload a PDF.');
+    if (
+      mimetype !==
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ) {
+      throw new Error(
+        'Непідтримуваний формат файлу. Будь ласка, завантажте XLSX.',
+      );
     }
 
-    const parsedTransactions = await this.pdfParsingService.parsePdf(buffer);
+    const createDocumentInput = {
+      name: filename,
+      fileName: filename,
+      url: '',
+      mimeType: mimetype,
+      size: buffer.length,
+      content: buffer.toString('base64'),
+    };
+    const document = await this.documentsService.create(
+      createDocumentInput,
+      user,
+    );
 
+    const parsedTransactions = await this.xlsxParsingService.parseXlsx(
+      buffer,
+      filename,
+    );
     const savedTransactions: Transaction[] = [];
+
     for (const transactionData of parsedTransactions) {
       const createdTransaction = await this.transactionsService.create(
-        transactionData,
+        { ...transactionData, documentId: document.id },
         user,
       );
       savedTransactions.push(createdTransaction);
     }
+
     return savedTransactions;
   }
 }

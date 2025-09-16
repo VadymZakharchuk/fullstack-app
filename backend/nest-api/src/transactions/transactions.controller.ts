@@ -8,11 +8,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PdfParsingService } from './pdf-parsing.service';
 import { DocumentsService } from '../documents/documents.service';
 import { TransactionsService } from './transactions.service';
+import { XlsxParsingService } from './xlsx-parsing.service';
 import { User } from '../users/user.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 
 interface RequestWithUser extends Request {
   user: User;
@@ -21,7 +22,7 @@ interface RequestWithUser extends Request {
 @Controller('transactions')
 export class TransactionsController {
   constructor(
-    private readonly pdfParsingService: PdfParsingService,
+    private readonly xlsxParsingService: XlsxParsingService,
     private readonly documentsService: DocumentsService,
     private readonly transactionsService: TransactionsService,
   ) {}
@@ -36,9 +37,19 @@ export class TransactionsController {
     if (!file || !file.buffer) {
       throw new BadRequestException('Файл відсутній або пошкоджений');
     }
+
+    // Крок 1: Перевірка типу файлу
+    if (
+      file.mimetype !==
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ) {
+      throw new BadRequestException(
+        'Непідтримуваний формат файлу. Будь ласка, завантажте XLSX.',
+      );
+    }
+
     const user: User = req.user;
 
-    // 1. Створення об'єкта CreateDocumentInput з даних файлу
     const createDocumentInput = {
       name: file.originalname,
       fileName: file.originalname,
@@ -47,29 +58,26 @@ export class TransactionsController {
       size: file.size,
       content: file.buffer.toString('base64'),
     };
-
     const document = await this.documentsService.create(
       createDocumentInput,
       user,
     );
 
-    // 3. Парсинг транзакцій з буфера файлу
-    const transactions = await this.pdfParsingService.parsePdf(file.buffer);
+    const transactions: CreateTransactionDto[] =
+      await this.xlsxParsingService.parseXlsx(file.buffer, file.originalname);
 
-    // 4. Збереження транзакцій у БД
-    // const savedTransactions = await this.transactionsService.createMany(
-    //   transactions,
-    //   document.id,
-    //   user,
-    // );
+    const savedTransactions = await Promise.all(
+      transactions.map((transactionData) =>
+        this.transactionsService.create(
+          { ...transactionData, documentId: document.id },
+          user,
+        ),
+      ),
+    );
 
-    // return {
-    //   message: `Успішно імпортовано ${savedTransactions.length} транзакцій.`,
-    //   count: savedTransactions.length,
-    //   documentId: document.id,
-    // };
     return {
-      count: transactions.length,
+      message: `Успішно імпортовано ${savedTransactions.length} транзакцій.`,
+      count: savedTransactions.length,
       documentId: document.id,
     };
   }

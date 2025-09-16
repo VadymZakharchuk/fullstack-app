@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../../../services/apiClient';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store';
+import type { RootState } from '../../../store';
 import { useForm, Controller } from 'react-hook-form';
 
 interface FileUploadForm {
@@ -30,19 +30,18 @@ const FileUploader: React.FC = () => {
     formData.append('file', selectedFile);
 
     try {
-      const response = await axios.post(
+      const response = await apiClient.post(
         'https://localhost:3000/transactions/upload',
         formData,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
           },
         }
       );
       setUploadStatus('success');
       setMessage(`Успішно імпортовано ${response.data.count} транзакцій.`);
-      reset(); // Очищаємо форму після успішного завантаження
+      reset();
     } catch (error: any) {
       setUploadStatus('error');
       setMessage(`Помилка під час завантаження файлу: ${error.response?.data?.message || 'Невідома помилка'}`);
@@ -52,7 +51,7 @@ const FileUploader: React.FC = () => {
   return (
     <div className="flex flex-col items-center p-8 bg-white shadow-lg rounded-lg max-w-xl mx-auto mt-10">
       <h2 className="text-2xl font-semibold mb-4 text-gray-800">Завантажити транзакції</h2>
-      <p className="text-gray-600 mb-6">Підтримується лише формат PDF.</p>
+      <p className="text-gray-600 mb-6">Підтримується лише формат XLSX.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col items-center">
         <div className="flex items-center">
@@ -64,17 +63,18 @@ const FileUploader: React.FC = () => {
             control={control}
             rules={{
               required: 'Будь ласка, оберіть файл.',
-              validate: {
-                fileType: (value: FileList) =>
-                  value[0]?.type === 'application/pdf' || 'Підтримується лише формат PDF.'
-              }
+              validate: (value: FileList) => {
+                const fileName = value[0]?.name;
+                const validExtension = fileName?.endsWith('.xlsx');
+                return validExtension || 'Підтримуються лише файли формату XLSX.';
+              },
             }}
             /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
             render={({ field: { onChange, value, ...rest } }) => (
               <input
                 id="file-upload"
                 type="file"
-                accept="application/pdf"
+                accept=".xlsx"
                 className="hidden"
                 onChange={(e) => {
                   onChange(e.target.files);

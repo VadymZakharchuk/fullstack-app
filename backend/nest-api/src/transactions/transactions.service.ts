@@ -24,19 +24,11 @@ export class TransactionsService {
     createTransactionInput: CreateTransactionInput,
     user: User,
   ): Promise<Transaction> {
-    const { categoryId, documentInput, ...restOfDto } = createTransactionInput;
-
-    let documentId: string | undefined = undefined;
-    if (documentInput) {
-      const document = await this.documentsService.create(documentInput, user);
-      documentId = document.id;
-    }
+    const { categoryId, documentId, ...restOfDto } =
+      createTransactionInput;
 
     let category: Category | undefined;
     if (categoryId) {
-      category = await this.categoriesService.findOne(+categoryId, user);
-    } else {
-      // Якщо категорія не надана, використовуємо сервіс для її визначення
       const categorizedDto =
         await this.transactionCategorizationService.assignCategoriesAndCounterParties(
           createTransactionInput,
@@ -58,7 +50,6 @@ export class TransactionsService {
 
     return this.transactionsRepository.save(transaction);
   }
-
   async findAll(user: User): Promise<Transaction[]> {
     return this.transactionsRepository.find({
       where: { user: { id: user.id } },

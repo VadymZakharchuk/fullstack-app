@@ -1,4 +1,4 @@
-import FileUploader from "../../../components/FileUploader.tsx";
+import FileUploader from "./FileUploader.tsx";
 
 const TransactionsPage = () => {
   return (
