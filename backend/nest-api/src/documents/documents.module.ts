@@ -13,6 +13,6 @@ import { UsersModule } from '../users/users.module';
     forwardRef(() => UsersModule),
   ],
   providers: [DocumentsService, DocumentsResolver],
-  exports: [DocumentsService],
+  exports: [DocumentsService, DocumentsResolver],
 })
 export class DocumentsModule {}

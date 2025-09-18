@@ -11,7 +11,7 @@ export const BANKS_CONFIG = [
     name: 'UkrSibbank',
     headers: ['Дата операції', 'Опис операції', 'Сума', 'Категорія'],
     dateCol: 'Дата операції',
-    descriptionCol: 'Опис операції',
+    descriptionCol: 'Категорія',
     amountCol: 'Сума',
     hasHeaderRow: false, // UkrSibbank має один рядок заголовків
   },

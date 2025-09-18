@@ -4,13 +4,13 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { AuthModule } from '../auth/auth.module';
-import { TransactionsModule } from '../transactions/transactions.module';
 import { CategoriesModule } from '../categories/categories.module';
 import { UsersResolver } from './users.resolver';
+import { Category } from '../categories/category.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Category]),
     forwardRef(() => AuthModule),
     forwardRef(() => AuthModule),
     forwardRef(() => CategoriesModule),

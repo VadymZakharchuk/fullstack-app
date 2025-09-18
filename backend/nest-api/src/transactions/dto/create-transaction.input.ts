@@ -22,6 +22,9 @@ export class CreateTransactionInput {
   @Field({ nullable: true })
   documentId?: string;
 
+  @Field()
+  bankName: string;
+
   @Field(() => CreateDocumentInput, { nullable: true })
   documentInput?: CreateDocumentInput;
 }

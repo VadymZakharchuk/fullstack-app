@@ -126,20 +126,17 @@ export class TransactionsResolver {
       user,
     );
 
-    const parsedTransactions = await this.xlsxParsingService.parseXlsx(
+    const { transactions, bankName } = await this.xlsxParsingService.parseXlsx(
       buffer,
       filename,
+      user,
     );
-    const savedTransactions: Transaction[] = [];
 
-    for (const transactionData of parsedTransactions) {
-      const createdTransaction = await this.transactionsService.create(
-        { ...transactionData, documentId: document.id },
-        user,
-      );
-      savedTransactions.push(createdTransaction);
-    }
-
-    return savedTransactions;
+    return await this.transactionsService.createMany(
+      transactions.map((t) => ({ ...t, documentId: document.id, bankName })),
+      document.id,
+      bankName,
+      user,
+    );
   }
 }

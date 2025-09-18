@@ -20,6 +20,10 @@ export class Category {
   @Column()
   name: string;
 
+  @Field(() => [String], { nullable: 'items' })
+  @Column('text', { array: true, default: '{}' })
+  keywords: string[];
+
   @Field(() => [Transaction], { nullable: 'itemsAndList' })
   @ManyToOne(() => User, (user) => user.categories)
   user: User;

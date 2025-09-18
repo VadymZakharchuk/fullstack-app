@@ -28,4 +28,7 @@ export class CreateTransactionDto {
   })
   @IsNotEmpty({ message: 'The type cannot be empty.' })
   type: 'income' | 'expense';
+
+  @IsString({ message: 'The description must be a string.' })
+  bankName?: string;
 }

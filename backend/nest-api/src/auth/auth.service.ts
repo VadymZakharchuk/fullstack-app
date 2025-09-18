@@ -44,10 +44,7 @@ export class AuthService {
 
   async register(body: RegisterDto): Promise<UserDto | string> {
     const { password, ...userData } = body;
-    const isEmailRegistered = this.usersService.findOneByEmail(userData.email);
-    if (isEmailRegistered !== null) {
-      return `EMail ${userData.email} is already registered. Registration failed`;
-    }
+
     const dbUser = await this.usersService.findOneByEmail(body.email);
     if (dbUser) {
       return `Can't create new account. Account with email ${body.email} already exists`;

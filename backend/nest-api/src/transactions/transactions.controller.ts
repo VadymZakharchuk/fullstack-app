@@ -63,16 +63,29 @@ export class TransactionsController {
       user,
     );
 
-    const transactions: CreateTransactionDto[] =
-      await this.xlsxParsingService.parseXlsx(file.buffer, file.originalname);
+    const { transactions, bankName } = await this.xlsxParsingService.parseXlsx(
+      file.buffer,
+      file.originalname,
+      user,
+    );
 
-    const savedTransactions = await Promise.all(
-      transactions.map((transactionData) =>
-        this.transactionsService.create(
-          { ...transactionData, documentId: document.id },
-          user,
-        ),
-      ),
+    if (!bankName) {
+      throw new BadRequestException(
+        "Назва банку (bankName) є обов'язковою для створення транзакції.",
+      );
+    }
+
+    const transactionsWithBankName = transactions.map((t) => ({
+      ...t,
+      documentId: document.id,
+      bankName: bankName,
+    }));
+
+    const savedTransactions = await this.transactionsService.createMany(
+      transactionsWithBankName,
+      document.id,
+      bankName,
+      user,
     );
 
     return {

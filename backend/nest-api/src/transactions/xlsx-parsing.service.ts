@@ -1,16 +1,50 @@
 // src/transactions/xlsx-parsing.service.ts
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Workbook, Cell, CellValue, Worksheet } from 'exceljs';
+import { Workbook, Cell, CellValue } from 'exceljs';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Readable } from 'stream';
 import { BANKS_CONFIG } from '../common/bankConfigs';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Category } from '../categories/category.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class XlsxParsingService {
+  constructor(
+    @InjectRepository(Category) // <--- Інжектуємо репозиторій Category
+    private categoriesRepository: Repository<Category>,
+  ) {}
+
+  private async determineCategoryByDescription(
+    description: string,
+    user: User,
+  ): Promise<number | null> {
+    const normalizedDescription = description.toLowerCase();
+
+    const categories = await this.categoriesRepository.find({
+      where: { user: { id: user.id } },
+    });
+
+    for (const category of categories) {
+      if (!category.keywords) {
+        continue;
+      }
+      for (const keyword of category.keywords) {
+        if (normalizedDescription.includes(keyword.toLowerCase())) {
+          return category.id;
+        }
+      }
+    }
+
+    return null;
+  }
+
   async parseXlsx(
     buffer: Buffer,
     fileName: string,
-  ): Promise<CreateTransactionDto[]> {
+    user: User,
+  ): Promise<{ transactions: CreateTransactionDto[]; bankName: string }> {
     try {
       const workbook = new Workbook();
       const stream = Readable.from(buffer);
@@ -79,18 +113,23 @@ export class XlsxParsingService {
           const amount = this.parseAmountFromCell(amountCell.value);
 
           const type = amount >= 0 ? 'income' : 'expense';
-
+          const categoryId = await this.determineCategoryByDescription(
+            description,
+            user,
+          );
+          const category = categoryId ? categoryId : undefined;
           const transactionDto: CreateTransactionDto = {
             date,
             description,
             amount,
             type,
+            categoryId: category,
           };
           transactions.push(transactionDto);
         }
       }
 
-      return transactions;
+      return { transactions, bankName: bankConfig.name };
     } catch (error: any) {
       throw new InternalServerErrorException(
         `Помилка обробки XLSX: ${error.message}`,
