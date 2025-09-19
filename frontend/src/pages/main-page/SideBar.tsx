@@ -29,7 +29,7 @@ const Sidebar: React.ComponentType<SidebarProps> = ({ navigation }: SidebarProps
 
   const navsFooter = [
     {
-      href: '/settings',
+      href: 'settings',
       name: 'Налаштування',
       icon: Settings,
     },
@@ -80,16 +80,18 @@ const Sidebar: React.ComponentType<SidebarProps> = ({ navigation }: SidebarProps
                     <li key={idx}>
                       {item.name === 'Вихід'
                         ? (
-                        <span onClick={logOut} className="flex items-center gap-x-2 text-gray-600 p-2 rounded-lg  hover:bg-gray-50 active:bg-gray-100 duration-150 cursor-pointer">
+                        <span onClick={logOut}
+                              className="flex items-center gap-x-2 text-gray-600 p-2 rounded-lg  hover:bg-gray-50 active:bg-gray-100 duration-150 cursor-pointer">
                             <div className="text-body-text">{renderIcon(item.icon)}</div>
                           {item.name}
                           </span>
                         )
                        : (
-                        <a href={item.href as string} className="flex items-center gap-x-2 text-gray-600 p-2 rounded-lg  hover:bg-gray-50 active:bg-gray-100 duration-150">
-                          <div className="text-body-text">{renderIcon(item.icon)}</div>
-                          {item.name}
-                        </a>
+                          <NavLink to={item.href as string}
+                                   className="flex items-center gap-x-2 text-gray-600 p-2 rounded-lg  hover:bg-gray-50 active:bg-gray-100 duration-150">
+                            <div className="text-body-text">{renderIcon(item.icon)}</div>
+                            {item.name}
+                          </NavLink>
                         )}
                     </li>
                   ))
